@@ -3,7 +3,14 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
+import AppLayout from "@/components/layout/AppLayout";
+import Dashboard from "@/pages/Dashboard";
+import Clientes from "@/pages/Clientes";
+import Prestations from "@/pages/Prestations";
+import Fidelite from "@/pages/Fidelite";
+import Rappels from "@/pages/Rappels";
+import Campagnes from "@/pages/Campagnes";
+import Parametres from "@/pages/Parametres";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -15,8 +22,15 @@ const App = () => (
       <Sonner />
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+          <Route element={<AppLayout />}>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/clientes" element={<Clientes />} />
+            <Route path="/prestations" element={<Prestations />} />
+            <Route path="/fidelite" element={<Fidelite />} />
+            <Route path="/rappels" element={<Rappels />} />
+            <Route path="/campagnes" element={<Campagnes />} />
+            <Route path="/parametres" element={<Parametres />} />
+          </Route>
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
