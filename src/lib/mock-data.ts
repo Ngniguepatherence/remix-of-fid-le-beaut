@@ -16,13 +16,17 @@ export const defaultSalon: Salon = {
 };
 
 export const defaultTypesPrestations: TypePrestation[] = [
-  // Coiffure
+  // Coiffure Femme
   { id: '1', nom: 'Coiffure simple', prix: 5000, description: 'Coiffure de base', categorie: 'Coiffure' },
   { id: '2', nom: 'Tresses africaines', prix: 15000, description: 'Tresses traditionnelles', categorie: 'Tresses' },
   { id: '3', nom: 'Tissage', prix: 25000, description: 'Pose de tissage complet', categorie: 'Coiffure' },
   { id: '4', nom: 'Défrisage', prix: 8000, description: 'Défrisage cheveux', categorie: 'Traitement' },
   { id: '14', nom: 'Locs / Dreadlocks', prix: 20000, description: 'Création ou entretien de locks', categorie: 'Coiffure' },
   { id: '15', nom: 'Coloration', prix: 12000, description: 'Coloration professionnelle', categorie: 'Coiffure' },
+  // Coiffure Homme
+  { id: '23', nom: 'Coupe homme classique', prix: 3000, description: 'Coupe tendance ou classique homme', categorie: 'Coiffure' },
+  { id: '24', nom: 'Coupe + Barbe homme', prix: 5000, description: 'Forfait coupe et taille de barbe', categorie: 'Coiffure' },
+  { id: '25', nom: 'Dégradé homme', prix: 4000, description: 'Coupe dégradé stylisé', categorie: 'Coiffure' },
   // Ongles
   { id: '5', nom: 'Manucure', prix: 3000, description: 'Soin des ongles mains', categorie: 'Ongles' },
   { id: '6', nom: 'Pédicure', prix: 4000, description: 'Soin des ongles pieds', categorie: 'Ongles' },
