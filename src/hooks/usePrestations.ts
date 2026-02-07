@@ -3,10 +3,17 @@ import { TypePrestation, Prestation } from '@/types';
 import { getStorageItem, setStorageItem, STORAGE_KEYS } from '@/lib/storage';
 import { defaultTypesPrestations, mockPrestations } from '@/lib/mock-data';
 
+function mergeDefaultTypes(stored: TypePrestation[], defaults: TypePrestation[]): TypePrestation[] {
+  const storedIds = new Set(stored.map(t => t.id));
+  const newDefaults = defaults.filter(d => !storedIds.has(d.id));
+  return newDefaults.length > 0 ? [...stored, ...newDefaults] : stored;
+}
+
 export function usePrestations() {
-  const [typesPrestations, setTypesPrestations] = useState<TypePrestation[]>(() => 
-    getStorageItem(STORAGE_KEYS.TYPES_PRESTATIONS, defaultTypesPrestations)
-  );
+  const [typesPrestations, setTypesPrestations] = useState<TypePrestation[]>(() => {
+    const stored = getStorageItem(STORAGE_KEYS.TYPES_PRESTATIONS, defaultTypesPrestations);
+    return mergeDefaultTypes(stored, defaultTypesPrestations);
+  });
   const [prestations, setPrestations] = useState<Prestation[]>(() => 
     getStorageItem(STORAGE_KEYS.PRESTATIONS, mockPrestations)
   );
