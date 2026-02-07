@@ -12,6 +12,7 @@ import {
   Gift,
   MessageSquare,
   Sparkles,
+  CalendarDays,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -26,6 +27,7 @@ const navItems: NavItem[] = [
   { href: '/', label: 'Tableau de bord', icon: LayoutDashboard },
   { href: '/clientes', label: 'Clientes', icon: Users },
   { href: '/prestations', label: 'Prestations', icon: Scissors },
+  { href: '/rendez-vous', label: 'Rendez-vous', icon: CalendarDays },
   { href: '/fidelite', label: 'Fidélité', icon: Gift },
   { href: '/rappels', label: 'Rappels', icon: Bell },
   { href: '/campagnes', label: 'Campagnes', icon: MessageSquare },

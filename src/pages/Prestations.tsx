@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Search, Edit, Trash2, Scissors } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Scissors, CalendarDays } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,19 +9,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { usePrestations } from '@/hooks/usePrestations';
 import { useClients } from '@/hooks/useClients';
 import { TypePrestation } from '@/types';
 import { TypePrestationForm } from '@/components/prestations/TypePrestationForm';
 import { NouvellePrestation } from '@/components/prestations/NouvellePrestation';
+import { CalendrierRendezVous } from '@/components/prestations/CalendrierRendezVous';
+import { getCategoryImage } from '@/lib/category-images';
 
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('fr-CM', {
@@ -32,11 +28,12 @@ function formatCurrency(amount: number): string {
 
 export default function Prestations() {
   const { typesPrestations, prestations, addTypePrestation, updateTypePrestation, deleteTypePrestation, getTypePrestation } = usePrestations();
-  const { clients, getClient } = useClients();
+  const { getClient } = useClients();
   const [showAddType, setShowAddType] = useState(false);
   const [editingType, setEditingType] = useState<TypePrestation | null>(null);
   const [showNouvellePrestation, setShowNouvellePrestation] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategorie, setSelectedCategorie] = useState<string | null>(null);
 
   const handleAddType = (data: Omit<TypePrestation, 'id'>) => {
     addTypePrestation(data);
@@ -56,7 +53,11 @@ export default function Prestations() {
     }
   };
 
-  const categories = [...new Set(typesPrestations.map(t => t.categorie).filter(Boolean))];
+  const categories = [...new Set(typesPrestations.map(t => t.categorie).filter(Boolean))] as string[];
+
+  const filteredTypes = selectedCategorie
+    ? typesPrestations.filter(t => t.categorie === selectedCategorie)
+    : typesPrestations;
 
   const recentPrestations = [...prestations]
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
@@ -82,53 +83,121 @@ export default function Prestations() {
         </div>
       </div>
 
-      <Tabs defaultValue="types" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="types">Types de prestations</TabsTrigger>
+      <Tabs defaultValue="catalogue" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="catalogue">Catalogue</TabsTrigger>
+          <TabsTrigger value="calendrier" className="flex items-center gap-2">
+            <CalendarDays className="h-4 w-4" />
+            Rendez-vous
+          </TabsTrigger>
           <TabsTrigger value="historique">Historique</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="types" className="space-y-4">
-          {/* Types Grid */}
+        {/* Catalogue with photos */}
+        <TabsContent value="catalogue" className="space-y-6">
+          {/* Category filter */}
+          <div className="flex gap-2 flex-wrap">
+            <Badge
+              variant={selectedCategorie === null ? 'default' : 'outline'}
+              className="cursor-pointer px-3 py-1.5 text-sm"
+              onClick={() => setSelectedCategorie(null)}
+            >
+              Tout
+            </Badge>
+            {categories.map((cat) => (
+              <Badge
+                key={cat}
+                variant={selectedCategorie === cat ? 'default' : 'outline'}
+                className="cursor-pointer px-3 py-1.5 text-sm"
+                onClick={() => setSelectedCategorie(cat)}
+              >
+                {cat}
+              </Badge>
+            ))}
+          </div>
+
+          {/* Category hero cards */}
+          {selectedCategorie === null && (
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {categories.map((cat) => {
+                const count = typesPrestations.filter(t => t.categorie === cat).length;
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => setSelectedCategorie(cat)}
+                    className="group relative overflow-hidden rounded-2xl aspect-[4/3] card-shadow transition-transform hover:scale-[1.02]"
+                  >
+                    <img
+                      src={getCategoryImage(cat)}
+                      alt={cat}
+                      className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                    <div className="absolute bottom-0 left-0 right-0 p-4 text-left">
+                      <h3 className="font-bold text-white text-lg">{cat}</h3>
+                      <p className="text-white/80 text-sm">{count} prestation{count > 1 ? 's' : ''}</p>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Service cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {typesPrestations.map((type) => (
-              <Card key={type.id} className="card-shadow">
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-foreground">{type.nom}</h3>
-                      {type.categorie && (
-                        <span className="text-xs text-muted-foreground bg-muted px-2 py-0.5 rounded-full">
-                          {type.categorie}
-                        </span>
-                      )}
-                      {type.description && (
-                        <p className="text-sm text-muted-foreground mt-2">{type.description}</p>
-                      )}
-                    </div>
-                    <div className="flex gap-1">
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8"
-                        onClick={() => setEditingType(type)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="icon" 
-                        className="h-8 w-8 text-destructive"
-                        onClick={() => handleDeleteType(type.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
+            {filteredTypes.map((type) => (
+              <Card key={type.id} className="card-shadow overflow-hidden group">
+                {/* Photo header */}
+                <div className="relative h-36 overflow-hidden">
+                  <img
+                    src={getCategoryImage(type.categorie)}
+                    alt={type.nom}
+                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                  {type.categorie && (
+                    <Badge className="absolute top-3 left-3 bg-white/90 text-foreground hover:bg-white/90 text-xs">
+                      {type.categorie}
+                    </Badge>
+                  )}
+                  <div className="absolute top-3 right-3 flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 bg-white/80 hover:bg-white text-foreground"
+                      onClick={() => setEditingType(type)}
+                    >
+                      <Edit className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 bg-white/80 hover:bg-white text-destructive"
+                      onClick={() => handleDeleteType(type.id)}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
                   </div>
-                  <div className="mt-4 pt-3 border-t border-border">
+                </div>
+
+                <CardContent className="p-4">
+                  <h3 className="font-semibold text-foreground text-base">{type.nom}</h3>
+                  {type.description && (
+                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{type.description}</p>
+                  )}
+                  <div className="mt-3 pt-3 border-t border-border flex items-center justify-between">
                     <span className="text-lg font-bold text-primary">
                       {formatCurrency(type.prix)}
                     </span>
+                    <Button
+                      size="sm"
+                      className="gradient-primary text-xs"
+                      onClick={() => setShowNouvellePrestation(true)}
+                    >
+                      Réserver
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -136,6 +205,12 @@ export default function Prestations() {
           </div>
         </TabsContent>
 
+        {/* Calendar */}
+        <TabsContent value="calendrier">
+          <CalendrierRendezVous />
+        </TabsContent>
+
+        {/* History */}
         <TabsContent value="historique" className="space-y-4">
           {/* Search */}
           <div className="relative max-w-md">
@@ -161,14 +236,23 @@ export default function Prestations() {
                     const client = getClient(prestation.clientId);
                     return (
                       <div key={prestation.id} className="flex items-center justify-between p-3 rounded-lg bg-muted/50">
-                        <div className="flex-1">
-                          <p className="font-medium">{type?.nom || 'Prestation inconnue'}</p>
-                          <p className="text-sm text-muted-foreground">
-                            {client?.nom || 'Cliente inconnue'} • {new Date(prestation.date).toLocaleDateString('fr-FR')}
-                            {prestation.employe && ` • Par ${prestation.employe}`}
-                          </p>
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
+                          <div className="h-10 w-10 rounded-lg overflow-hidden flex-shrink-0">
+                            <img
+                              src={getCategoryImage(type?.categorie)}
+                              alt=""
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="font-medium truncate">{type?.nom || 'Prestation inconnue'}</p>
+                            <p className="text-sm text-muted-foreground truncate">
+                              {client?.nom || 'Cliente inconnue'} • {new Date(prestation.date).toLocaleDateString('fr-FR')}
+                              {prestation.employe && ` • Par ${prestation.employe}`}
+                            </p>
+                          </div>
                         </div>
-                        <span className="font-semibold text-primary">
+                        <span className="font-semibold text-primary whitespace-nowrap ml-3">
                           {formatCurrency(prestation.montant)}
                         </span>
                       </div>
@@ -200,10 +284,10 @@ export default function Prestations() {
             <DialogTitle>Modifier le type de prestation</DialogTitle>
           </DialogHeader>
           {editingType && (
-            <TypePrestationForm 
+            <TypePrestationForm
               type={editingType}
-              onSubmit={handleEditType} 
-              onCancel={() => setEditingType(null)} 
+              onSubmit={handleEditType}
+              onCancel={() => setEditingType(null)}
             />
           )}
         </DialogContent>

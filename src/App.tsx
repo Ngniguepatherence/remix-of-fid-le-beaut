@@ -7,6 +7,7 @@ import AppLayout from "@/components/layout/AppLayout";
 import Dashboard from "@/pages/Dashboard";
 import Clientes from "@/pages/Clientes";
 import Prestations from "@/pages/Prestations";
+import RendezVousPage from "@/pages/RendezVous";
 import Fidelite from "@/pages/Fidelite";
 import Rappels from "@/pages/Rappels";
 import Campagnes from "@/pages/Campagnes";
@@ -26,6 +27,7 @@ const App = () => (
             <Route path="/" element={<Dashboard />} />
             <Route path="/clientes" element={<Clientes />} />
             <Route path="/prestations" element={<Prestations />} />
+            <Route path="/rendez-vous" element={<RendezVousPage />} />
             <Route path="/fidelite" element={<Fidelite />} />
             <Route path="/rappels" element={<Rappels />} />
             <Route path="/campagnes" element={<Campagnes />} />
