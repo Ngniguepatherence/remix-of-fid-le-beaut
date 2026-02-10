@@ -34,4 +34,7 @@ export const STORAGE_KEYS = {
   SALON: 'beautyflow_salon',
   UTILISATEUR: 'beautyflow_utilisateur',
   AUTH: 'beautyflow_auth',
+  PRODUITS: 'beautyflow_produits',
+  VENTES: 'beautyflow_ventes',
+  DEPENSES: 'beautyflow_depenses',
 } as const;
