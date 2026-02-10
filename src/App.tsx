@@ -12,6 +12,8 @@ import Fidelite from "@/pages/Fidelite";
 import Rappels from "@/pages/Rappels";
 import Campagnes from "@/pages/Campagnes";
 import Parametres from "@/pages/Parametres";
+import Stock from "@/pages/Stock";
+import Finances from "@/pages/Finances";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -31,6 +33,8 @@ const App = () => (
             <Route path="/fidelite" element={<Fidelite />} />
             <Route path="/rappels" element={<Rappels />} />
             <Route path="/campagnes" element={<Campagnes />} />
+            <Route path="/stock" element={<Stock />} />
+            <Route path="/finances" element={<Finances />} />
             <Route path="/parametres" element={<Parametres />} />
           </Route>
           <Route path="*" element={<NotFound />} />
