@@ -53,8 +53,16 @@ export default function Clientes() {
     });
   }, [clients, searchQuery, statusFilter]);
 
-  const handleAddClient = (data: Omit<Client, 'id' | 'dateInscription' | 'pointsFidelite' | 'totalDepense' | 'nombreVisites'>) => {
-    addClient(data);
+  const handleAddClient = (data: any) => {
+    const parrainId = data.parrainId && data.parrainId !== 'none' ? data.parrainId : undefined;
+    const newClient = addClient({ ...data, parrainId });
+    // Award bonus points to referrer
+    if (parrainId && newClient) {
+      updateClient(parrainId, {
+        pointsFidelite: (clients.find(c => c.id === parrainId)?.pointsFidelite || 0) + 3,
+        filleuls: [...(clients.find(c => c.id === parrainId)?.filleuls || []), newClient.id],
+      });
+    }
     setShowAddDialog(false);
   };
 
