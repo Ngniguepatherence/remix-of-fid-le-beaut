@@ -14,6 +14,50 @@ export interface Client {
   totalDepense: number;
   nombreVisites: number;
   derniereVisite?: string;
+  parrainId?: string;
+  filleuls?: string[];
+}
+
+// Produits & Stock
+export interface Produit {
+  id: string;
+  nom: string;
+  categorie: string;
+  prix: number;
+  prixAchat: number;
+  quantite: number;
+  seuilAlerte: number;
+  description?: string;
+  unite: string;
+}
+
+// Ventes
+export interface Vente {
+  id: string;
+  date: string;
+  clientId?: string;
+  items: VenteItem[];
+  totalMontant: number;
+  modePaiement: 'especes' | 'mobile_money' | 'carte' | 'mixte';
+  notes?: string;
+}
+
+export interface VenteItem {
+  type: 'produit' | 'prestation';
+  referenceId: string;
+  nom: string;
+  quantite: number;
+  prixUnitaire: number;
+  montant: number;
+}
+
+// Dépenses
+export interface Depense {
+  id: string;
+  date: string;
+  categorie: string;
+  description: string;
+  montant: number;
 }
 
 export interface TypePrestation {

@@ -53,8 +53,16 @@ export default function Clientes() {
     });
   }, [clients, searchQuery, statusFilter]);
 
-  const handleAddClient = (data: Omit<Client, 'id' | 'dateInscription' | 'pointsFidelite' | 'totalDepense' | 'nombreVisites'>) => {
-    addClient(data);
+  const handleAddClient = (data: any) => {
+    const parrainId = data.parrainId && data.parrainId !== 'none' ? data.parrainId : undefined;
+    const newClient = addClient({ ...data, parrainId });
+    // Award bonus points to referrer
+    if (parrainId && newClient) {
+      updateClient(parrainId, {
+        pointsFidelite: (clients.find(c => c.id === parrainId)?.pointsFidelite || 0) + 3,
+        filleuls: [...(clients.find(c => c.id === parrainId)?.filleuls || []), newClient.id],
+      });
+    }
     setShowAddDialog(false);
   };
 
@@ -174,15 +182,28 @@ export default function Clientes() {
                 </div>
               </div>
 
-              <div className="mt-4 pt-4 border-t border-border flex items-center justify-between text-sm">
-                <div>
-                  <span className="text-muted-foreground">Visites: </span>
-                  <span className="font-semibold">{client.nombreVisites}</span>
+              <div className="mt-4 pt-4 border-t border-border space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <div>
+                    <span className="text-muted-foreground">Visites: </span>
+                    <span className="font-semibold">{client.nombreVisites}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Points: </span>
+                    <span className="font-semibold text-primary">{client.pointsFidelite}</span>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-muted-foreground">Points: </span>
-                  <span className="font-semibold text-primary">{client.pointsFidelite}</span>
-                </div>
+                {client.parrainId && (
+                  <div className="text-xs text-muted-foreground">
+                    🤝 Parrainée par <span className="font-medium text-foreground">{clients.find(c => c.id === client.parrainId)?.nom || '—'}</span>
+                  </div>
+                )}
+                {client.filleuls && client.filleuls.length > 0 && (
+                  <div className="text-xs">
+                    <span className="text-accent font-medium">⭐ {client.filleuls.length} filleul(s)</span>
+                    <span className="text-muted-foreground"> • +{client.filleuls.length * 3} pts bonus</span>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -201,7 +222,7 @@ export default function Clientes() {
           <DialogHeader>
             <DialogTitle>Nouvelle cliente</DialogTitle>
           </DialogHeader>
-          <ClientForm onSubmit={handleAddClient} onCancel={() => setShowAddDialog(false)} />
+          <ClientForm clients={clients} onSubmit={handleAddClient} onCancel={() => setShowAddDialog(false)} />
         </DialogContent>
       </Dialog>
 
@@ -213,7 +234,8 @@ export default function Clientes() {
           </DialogHeader>
           {editingClient && (
             <ClientForm 
-              client={editingClient} 
+              client={editingClient}
+              clients={clients}
               onSubmit={handleEditClient} 
               onCancel={() => setEditingClient(null)} 
             />

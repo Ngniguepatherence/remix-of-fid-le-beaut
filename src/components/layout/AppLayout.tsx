@@ -13,6 +13,8 @@ import {
   MessageSquare,
   Sparkles,
   CalendarDays,
+  Package,
+  DollarSign,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -28,6 +30,8 @@ const navItems: NavItem[] = [
   { href: '/clientes', label: 'Clientes', icon: Users },
   { href: '/prestations', label: 'Prestations', icon: Scissors },
   { href: '/rendez-vous', label: 'Rendez-vous', icon: CalendarDays },
+  { href: '/stock', label: 'Stock', icon: Package },
+  { href: '/finances', label: 'Finances', icon: DollarSign },
   { href: '/fidelite', label: 'Fidélité', icon: Gift },
   { href: '/rappels', label: 'Rappels', icon: Bell },
   { href: '/campagnes', label: 'Campagnes', icon: MessageSquare },

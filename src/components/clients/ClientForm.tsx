@@ -28,17 +28,19 @@ const clientSchema = z.object({
   dateAnniversaire: z.string().optional(),
   statut: z.enum(['nouvelle', 'reguliere', 'vip']),
   notes: z.string().optional(),
+  parrainId: z.string().optional(),
 });
 
 type ClientFormData = z.infer<typeof clientSchema>;
 
 interface ClientFormProps {
   client?: Client;
+  clients?: Client[];
   onSubmit: (data: ClientFormData) => void;
   onCancel: () => void;
 }
 
-export function ClientForm({ client, onSubmit, onCancel }: ClientFormProps) {
+export function ClientForm({ client, clients = [], onSubmit, onCancel }: ClientFormProps) {
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
     defaultValues: {
@@ -47,6 +49,7 @@ export function ClientForm({ client, onSubmit, onCancel }: ClientFormProps) {
       dateAnniversaire: client?.dateAnniversaire || '',
       statut: client?.statut || 'nouvelle',
       notes: client?.notes || '',
+      parrainId: client?.parrainId || '',
     },
   });
 
@@ -112,39 +115,63 @@ export function ClientForm({ client, onSubmit, onCancel }: ClientFormProps) {
                   <SelectItem value="reguliere">Régulière</SelectItem>
                   <SelectItem value="vip">VIP</SelectItem>
                 </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Notes (optionnel)</FormLabel>
+      <FormField
+        control={form.control}
+        name="parrainId"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Parrainée par (optionnel)</FormLabel>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
               <FormControl>
-                <Textarea 
-                  placeholder="Préférences, allergies, remarques..."
-                  className="resize-none"
-                  {...field} 
-                />
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner une marraine" />
+                </SelectTrigger>
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+              <SelectContent>
+                <SelectItem value="none">Aucune</SelectItem>
+                {clients.filter(c => c.id !== client?.id).map(c => (
+                  <SelectItem key={c.id} value={c.id}>{c.nom} ({c.telephone})</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-        <div className="flex gap-3 pt-4">
-          <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
-            Annuler
-          </Button>
-          <Button type="submit" className="flex-1 gradient-primary">
-            {client ? 'Modifier' : 'Ajouter'}
-          </Button>
-        </div>
-      </form>
-    </Form>
+      <FormField
+        control={form.control}
+        name="notes"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Notes (optionnel)</FormLabel>
+            <FormControl>
+              <Textarea 
+                placeholder="Préférences, allergies, remarques..."
+                className="resize-none"
+                {...field} 
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <div className="flex gap-3 pt-4">
+        <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
+          Annuler
+        </Button>
+        <Button type="submit" className="flex-1 gradient-primary">
+          {client ? 'Modifier' : 'Ajouter'}
+        </Button>
+      </div>
+    </form>
+  </Form>
   );
 }
