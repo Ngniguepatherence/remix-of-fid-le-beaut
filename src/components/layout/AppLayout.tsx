@@ -13,6 +13,8 @@ import {
   MessageSquare,
   Sparkles,
   CalendarDays,
+  Package,
+  DollarSign,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
