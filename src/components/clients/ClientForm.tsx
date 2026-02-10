@@ -28,17 +28,19 @@ const clientSchema = z.object({
   dateAnniversaire: z.string().optional(),
   statut: z.enum(['nouvelle', 'reguliere', 'vip']),
   notes: z.string().optional(),
+  parrainId: z.string().optional(),
 });
 
 type ClientFormData = z.infer<typeof clientSchema>;
 
 interface ClientFormProps {
   client?: Client;
+  clients?: Client[];
   onSubmit: (data: ClientFormData) => void;
   onCancel: () => void;
 }
 
-export function ClientForm({ client, onSubmit, onCancel }: ClientFormProps) {
+export function ClientForm({ client, clients = [], onSubmit, onCancel }: ClientFormProps) {
   const form = useForm<ClientFormData>({
     resolver: zodResolver(clientSchema),
     defaultValues: {
@@ -47,6 +49,7 @@ export function ClientForm({ client, onSubmit, onCancel }: ClientFormProps) {
       dateAnniversaire: client?.dateAnniversaire || '',
       statut: client?.statut || 'nouvelle',
       notes: client?.notes || '',
+      parrainId: client?.parrainId || '',
     },
   });
 
