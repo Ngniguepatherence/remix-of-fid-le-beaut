@@ -234,7 +234,8 @@ export default function Clientes() {
           </DialogHeader>
           {editingClient && (
             <ClientForm 
-              client={editingClient} 
+              client={editingClient}
+              clients={clients}
               onSubmit={handleEditClient} 
               onCancel={() => setEditingClient(null)} 
             />

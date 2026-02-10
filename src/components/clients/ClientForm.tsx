@@ -115,39 +115,63 @@ export function ClientForm({ client, clients = [], onSubmit, onCancel }: ClientF
                   <SelectItem value="reguliere">Régulière</SelectItem>
                   <SelectItem value="vip">VIP</SelectItem>
                 </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-        <FormField
-          control={form.control}
-          name="notes"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Notes (optionnel)</FormLabel>
+      <FormField
+        control={form.control}
+        name="parrainId"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Parrainée par (optionnel)</FormLabel>
+            <Select onValueChange={field.onChange} defaultValue={field.value}>
               <FormControl>
-                <Textarea 
-                  placeholder="Préférences, allergies, remarques..."
-                  className="resize-none"
-                  {...field} 
-                />
+                <SelectTrigger>
+                  <SelectValue placeholder="Sélectionner une marraine" />
+                </SelectTrigger>
               </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+              <SelectContent>
+                <SelectItem value="none">Aucune</SelectItem>
+                {clients.filter(c => c.id !== client?.id).map(c => (
+                  <SelectItem key={c.id} value={c.id}>{c.nom} ({c.telephone})</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-        <div className="flex gap-3 pt-4">
-          <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
-            Annuler
-          </Button>
-          <Button type="submit" className="flex-1 gradient-primary">
-            {client ? 'Modifier' : 'Ajouter'}
-          </Button>
-        </div>
-      </form>
-    </Form>
+      <FormField
+        control={form.control}
+        name="notes"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Notes (optionnel)</FormLabel>
+            <FormControl>
+              <Textarea 
+                placeholder="Préférences, allergies, remarques..."
+                className="resize-none"
+                {...field} 
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+
+      <div className="flex gap-3 pt-4">
+        <Button type="button" variant="outline" onClick={onCancel} className="flex-1">
+          Annuler
+        </Button>
+        <Button type="submit" className="flex-1 gradient-primary">
+          {client ? 'Modifier' : 'Ajouter'}
+        </Button>
+      </div>
+    </form>
+  </Form>
   );
 }

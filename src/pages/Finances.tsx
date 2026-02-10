@@ -206,7 +206,7 @@ export default function Finances() {
   };
 
   const handleAddDepense = (data: z.infer<typeof depenseSchema>) => {
-    addDepense(data);
+    addDepense({ date: data.date, categorie: data.categorie, description: data.description, montant: data.montant });
     toast.success('Dépense enregistrée !');
     setShowDepenseForm(false);
   };
