@@ -222,7 +222,7 @@ export default function Clientes() {
           <DialogHeader>
             <DialogTitle>Nouvelle cliente</DialogTitle>
           </DialogHeader>
-          <ClientForm onSubmit={handleAddClient} onCancel={() => setShowAddDialog(false)} />
+          <ClientForm clients={clients} onSubmit={handleAddClient} onCancel={() => setShowAddDialog(false)} />
         </DialogContent>
       </Dialog>
 
