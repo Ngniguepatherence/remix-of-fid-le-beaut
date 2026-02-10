@@ -182,15 +182,28 @@ export default function Clientes() {
                 </div>
               </div>
 
-              <div className="mt-4 pt-4 border-t border-border flex items-center justify-between text-sm">
-                <div>
-                  <span className="text-muted-foreground">Visites: </span>
-                  <span className="font-semibold">{client.nombreVisites}</span>
+              <div className="mt-4 pt-4 border-t border-border space-y-2">
+                <div className="flex items-center justify-between text-sm">
+                  <div>
+                    <span className="text-muted-foreground">Visites: </span>
+                    <span className="font-semibold">{client.nombreVisites}</span>
+                  </div>
+                  <div>
+                    <span className="text-muted-foreground">Points: </span>
+                    <span className="font-semibold text-primary">{client.pointsFidelite}</span>
+                  </div>
                 </div>
-                <div>
-                  <span className="text-muted-foreground">Points: </span>
-                  <span className="font-semibold text-primary">{client.pointsFidelite}</span>
-                </div>
+                {client.parrainId && (
+                  <div className="text-xs text-muted-foreground">
+                    🤝 Parrainée par <span className="font-medium text-foreground">{clients.find(c => c.id === client.parrainId)?.nom || '—'}</span>
+                  </div>
+                )}
+                {client.filleuls && client.filleuls.length > 0 && (
+                  <div className="text-xs">
+                    <span className="text-accent font-medium">⭐ {client.filleuls.length} filleul(s)</span>
+                    <span className="text-muted-foreground"> • +{client.filleuls.length * 3} pts bonus</span>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
