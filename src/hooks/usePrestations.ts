@@ -1,7 +1,8 @@
 import { useState, useCallback, useEffect } from 'react';
 import { TypePrestation, Prestation } from '@/types';
-import { getStorageItem, setStorageItem, STORAGE_KEYS } from '@/lib/storage';
+import { getStorageItem, setStorageItem, tenantStorageKey, STORAGE_KEYS } from '@/lib/storage';
 import { defaultTypesPrestations, mockPrestations } from '@/lib/mock-data';
+import { useAuth } from '@/contexts/AuthContext';
 
 function mergeDefaultTypes(stored: TypePrestation[], defaults: TypePrestation[]): TypePrestation[] {
   const storedIds = new Set(stored.map(t => t.id));
@@ -10,28 +11,28 @@ function mergeDefaultTypes(stored: TypePrestation[], defaults: TypePrestation[])
 }
 
 export function usePrestations() {
+  const { session } = useAuth();
+  const salonId = session?.salonId;
+  const typesKey = tenantStorageKey(salonId, STORAGE_KEYS.TYPES_PRESTATIONS);
+  const prestKey = tenantStorageKey(salonId, STORAGE_KEYS.PRESTATIONS);
+
   const [typesPrestations, setTypesPrestations] = useState<TypePrestation[]>(() => {
-    const stored = getStorageItem(STORAGE_KEYS.TYPES_PRESTATIONS, defaultTypesPrestations);
+    const stored = getStorageItem(typesKey, defaultTypesPrestations);
     return mergeDefaultTypes(stored, defaultTypesPrestations);
   });
   const [prestations, setPrestations] = useState<Prestation[]>(() => 
-    getStorageItem(STORAGE_KEYS.PRESTATIONS, mockPrestations)
+    getStorageItem(prestKey, mockPrestations)
   );
 
+  useEffect(() => { setStorageItem(typesKey, typesPrestations); }, [typesPrestations, typesKey]);
+  useEffect(() => { setStorageItem(prestKey, prestations); }, [prestations, prestKey]);
   useEffect(() => {
-    setStorageItem(STORAGE_KEYS.TYPES_PRESTATIONS, typesPrestations);
-  }, [typesPrestations]);
+    setTypesPrestations(mergeDefaultTypes(getStorageItem(typesKey, defaultTypesPrestations), defaultTypesPrestations));
+    setPrestations(getStorageItem(prestKey, mockPrestations));
+  }, [typesKey, prestKey]);
 
-  useEffect(() => {
-    setStorageItem(STORAGE_KEYS.PRESTATIONS, prestations);
-  }, [prestations]);
-
-  // Types de prestations
   const addTypePrestation = useCallback((type: Omit<TypePrestation, 'id'>) => {
-    const newType: TypePrestation = {
-      ...type,
-      id: crypto.randomUUID(),
-    };
+    const newType: TypePrestation = { ...type, id: crypto.randomUUID() };
     setTypesPrestations(prev => [...prev, newType]);
     return newType;
   }, []);
@@ -48,27 +49,19 @@ export function usePrestations() {
     return typesPrestations.find(t => t.id === id);
   }, [typesPrestations]);
 
-  // Prestations
   const addPrestation = useCallback((prestation: Omit<Prestation, 'id' | 'date'>) => {
-    const newPrestation: Prestation = {
-      ...prestation,
-      id: crypto.randomUUID(),
-      date: new Date().toISOString().split('T')[0],
-    };
+    const newPrestation: Prestation = { ...prestation, id: crypto.randomUUID(), date: new Date().toISOString().split('T')[0] };
     setPrestations(prev => [...prev, newPrestation]);
     return newPrestation;
   }, []);
 
   const getPrestationsClient = useCallback((clientId: string) => {
-    return prestations
-      .filter(p => p.clientId === clientId)
-      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    return prestations.filter(p => p.clientId === clientId).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [prestations]);
 
   const getPrestationsCeMois = useCallback(() => {
     const now = new Date();
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-    
     return prestations.filter(p => new Date(p.date) >= startOfMonth);
   }, [prestations]);
 
@@ -78,31 +71,12 @@ export function usePrestations() {
 
   const getPrestationsPopulaires = useCallback(() => {
     const counts: Record<string, number> = {};
-    
     prestations.forEach(p => {
       const type = typesPrestations.find(t => t.id === p.typePrestationId);
-      if (type) {
-        counts[type.nom] = (counts[type.nom] || 0) + 1;
-      }
+      if (type) counts[type.nom] = (counts[type.nom] || 0) + 1;
     });
-
-    return Object.entries(counts)
-      .map(([nom, count]) => ({ nom, count }))
-      .sort((a, b) => b.count - a.count)
-      .slice(0, 5);
+    return Object.entries(counts).map(([nom, count]) => ({ nom, count })).sort((a, b) => b.count - a.count).slice(0, 5);
   }, [prestations, typesPrestations]);
 
-  return {
-    typesPrestations,
-    prestations,
-    addTypePrestation,
-    updateTypePrestation,
-    deleteTypePrestation,
-    getTypePrestation,
-    addPrestation,
-    getPrestationsClient,
-    getPrestationsCeMois,
-    getRevenusCeMois,
-    getPrestationsPopulaires,
-  };
+  return { typesPrestations, prestations, addTypePrestation, updateTypePrestation, deleteTypePrestation, getTypePrestation, addPrestation, getPrestationsClient, getPrestationsCeMois, getRevenusCeMois, getPrestationsPopulaires };
 }

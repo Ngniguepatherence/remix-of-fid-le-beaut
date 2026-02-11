@@ -25,16 +25,23 @@ export function removeStorageItem(key: string): void {
   }
 }
 
-// Clés de stockage
+// Clé de stockage avec isolation par tenant
+export function tenantStorageKey(salonId: string | undefined, key: string): string {
+  if (!salonId) return key; // fallback
+  return `bf_${salonId}_${key}`;
+}
+
+// Clés de stockage de base (utilisées avec tenantStorageKey)
 export const STORAGE_KEYS = {
-  CLIENTS: 'beautyflow_clients',
-  PRESTATIONS: 'beautyflow_prestations',
-  TYPES_PRESTATIONS: 'beautyflow_types_prestations',
-  RAPPELS: 'beautyflow_rappels',
-  SALON: 'beautyflow_salon',
-  UTILISATEUR: 'beautyflow_utilisateur',
-  AUTH: 'beautyflow_auth',
-  PRODUITS: 'beautyflow_produits',
-  VENTES: 'beautyflow_ventes',
-  DEPENSES: 'beautyflow_depenses',
+  CLIENTS: 'clients',
+  PRESTATIONS: 'prestations',
+  TYPES_PRESTATIONS: 'types_prestations',
+  RAPPELS: 'rappels',
+  SALON: 'salon',
+  UTILISATEUR: 'utilisateur',
+  AUTH: 'auth',
+  PRODUITS: 'produits',
+  VENTES: 'ventes',
+  DEPENSES: 'depenses',
+  RENDEZ_VOUS: 'rendez_vous',
 } as const;
