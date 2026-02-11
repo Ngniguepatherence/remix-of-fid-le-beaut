@@ -1,10 +1,11 @@
 import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Produit } from '@/types';
-import { getStorageItem, setStorageItem, STORAGE_KEYS } from '@/lib/storage';
+import { getStorageItem, setStorageItem, tenantStorageKey, STORAGE_KEYS } from '@/lib/storage';
+import { useAuth } from '@/contexts/AuthContext';
 
 const defaultProduits: Produit[] = [
   { id: '1', nom: 'Shampoing professionnel', categorie: 'Cheveux', prix: 5000, prixAchat: 3000, quantite: 24, seuilAlerte: 5, unite: 'bouteille', description: 'Shampoing kératine 500ml' },
-  { id: '2', nom: 'Après-shampoing', categorie: 'Cheveux', prix: 4500, prixAchat: 2500, quantite: 18, seuilAlerte: 5, unite: 'bouteille', description: 'Après-shampoing nourrissant 500ml' },
+  { id: '2', nom: 'Après-shampoing', categorie: 'Cheveux', prix: 4500, prixAchat: 2500, quantite: 18, seuilAlerte: 5, unite: 'bouteille' },
   { id: '3', nom: 'Huile de coco', categorie: 'Cheveux', prix: 3000, prixAchat: 1500, quantite: 30, seuilAlerte: 8, unite: 'flacon' },
   { id: '4', nom: 'Crème défrisante', categorie: 'Cheveux', prix: 6000, prixAchat: 3500, quantite: 12, seuilAlerte: 4, unite: 'pot' },
   { id: '5', nom: 'Vernis à ongles', categorie: 'Ongles', prix: 2000, prixAchat: 800, quantite: 45, seuilAlerte: 10, unite: 'flacon' },
@@ -18,13 +19,14 @@ const defaultProduits: Produit[] = [
 ];
 
 export function useStock() {
-  const [produits, setProduits] = useState<Produit[]>(() =>
-    getStorageItem(STORAGE_KEYS.PRODUITS, defaultProduits)
-  );
+  const { session } = useAuth();
+  const salonId = session?.salonId;
+  const key = tenantStorageKey(salonId, STORAGE_KEYS.PRODUITS);
 
-  useEffect(() => {
-    setStorageItem(STORAGE_KEYS.PRODUITS, produits);
-  }, [produits]);
+  const [produits, setProduits] = useState<Produit[]>(() => getStorageItem(key, defaultProduits));
+
+  useEffect(() => { setStorageItem(key, produits); }, [produits, key]);
+  useEffect(() => { setProduits(getStorageItem(key, defaultProduits)); }, [key]);
 
   const addProduit = useCallback((produit: Omit<Produit, 'id'>) => {
     const newProduit: Produit = { ...produit, id: crypto.randomUUID() };
@@ -41,34 +43,12 @@ export function useStock() {
   }, []);
 
   const adjustStock = useCallback((id: string, quantiteChange: number) => {
-    setProduits(prev => prev.map(p =>
-      p.id === id ? { ...p, quantite: Math.max(0, p.quantite + quantiteChange) } : p
-    ));
+    setProduits(prev => prev.map(p => p.id === id ? { ...p, quantite: Math.max(0, p.quantite + quantiteChange) } : p));
   }, []);
 
-  const produitsEnAlerte = useMemo(() =>
-    produits.filter(p => p.quantite <= p.seuilAlerte),
-    [produits]
-  );
+  const produitsEnAlerte = useMemo(() => produits.filter(p => p.quantite <= p.seuilAlerte), [produits]);
+  const categories = useMemo(() => [...new Set(produits.map(p => p.categorie))], [produits]);
+  const valeurStock = useMemo(() => produits.reduce((sum, p) => sum + p.prixAchat * p.quantite, 0), [produits]);
 
-  const categories = useMemo(() =>
-    [...new Set(produits.map(p => p.categorie))],
-    [produits]
-  );
-
-  const valeurStock = useMemo(() =>
-    produits.reduce((sum, p) => sum + p.prixAchat * p.quantite, 0),
-    [produits]
-  );
-
-  return {
-    produits,
-    addProduit,
-    updateProduit,
-    deleteProduit,
-    adjustStock,
-    produitsEnAlerte,
-    categories,
-    valeurStock,
-  };
+  return { produits, addProduit, updateProduit, deleteProduit, adjustStock, produitsEnAlerte, categories, valeurStock };
 }

@@ -15,9 +15,12 @@ import {
   CalendarDays,
   Package,
   DollarSign,
+  LogOut,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { useAuth } from '@/contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface NavItem {
   href: string;
@@ -60,6 +63,14 @@ function NavLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
 }
 
 function Sidebar({ className, onItemClick }: { className?: string; onItemClick?: () => void }) {
+  const { logout, currentSalon } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
   return (
     <aside className={cn('flex flex-col h-full bg-sidebar', className)}>
       {/* Logo */}
@@ -69,7 +80,9 @@ function Sidebar({ className, onItemClick }: { className?: string; onItemClick?:
             <Sparkles className="h-6 w-6 text-white" />
           </div>
           <div>
-            <h1 className="font-bold text-lg text-sidebar-foreground leading-tight">LeaderBright</h1>
+            <h1 className="font-bold text-lg text-sidebar-foreground leading-tight">
+              {currentSalon?.nom || 'LeaderBright'}
+            </h1>
             <p className="text-xs text-muted-foreground">BeautyFlow</p>
           </div>
         </Link>
@@ -83,7 +96,11 @@ function Sidebar({ className, onItemClick }: { className?: string; onItemClick?:
       </nav>
 
       {/* Footer */}
-      <div className="p-4 border-t border-sidebar-border">
+      <div className="p-4 border-t border-sidebar-border space-y-2">
+        <Button variant="ghost" className="w-full justify-start text-muted-foreground" onClick={handleLogout}>
+          <LogOut className="h-4 w-4 mr-2" />
+          Déconnexion
+        </Button>
         <p className="text-xs text-muted-foreground text-center">
           © 2025 LeaderBright
         </p>
