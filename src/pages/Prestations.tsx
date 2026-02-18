@@ -18,7 +18,7 @@ import { TypePrestationForm } from '@/components/prestations/TypePrestationForm'
 import { NouvellePrestation } from '@/components/prestations/NouvellePrestation';
 import { CalendrierRendezVous } from '@/components/prestations/CalendrierRendezVous';
 import { getCategoryImage } from '@/lib/category-images';
-
+import { useLanguage } from '@/contexts/LanguageContext';
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('fr-CM', {
     style: 'decimal',
@@ -29,6 +29,7 @@ function formatCurrency(amount: number): string {
 export default function Prestations() {
   const { typesPrestations, prestations, addTypePrestation, updateTypePrestation, deleteTypePrestation, getTypePrestation } = usePrestations();
   const { getClient } = useClients();
+  const { t } = useLanguage();
   const [showAddType, setShowAddType] = useState(false);
   const [editingType, setEditingType] = useState<TypePrestation | null>(null);
   const [showNouvellePrestation, setShowNouvellePrestation] = useState(false);
@@ -48,7 +49,7 @@ export default function Prestations() {
   };
 
   const handleDeleteType = (id: string) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer ce type de prestation ?')) {
+    if (confirm(t('services.deleteConfirm'))) {
       deleteTypePrestation(id);
     }
   };
@@ -68,29 +69,29 @@ export default function Prestations() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Prestations</h1>
-          <p className="text-muted-foreground">{typesPrestations.length} types de prestations</p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">{t('services.title')}</h1>
+          <p className="text-muted-foreground">{typesPrestations.length} {t('services.types')}</p>
         </div>
         <div className="flex gap-2">
           <Button onClick={() => setShowAddType(true)} variant="outline">
             <Plus className="h-4 w-4 mr-2" />
-            Nouveau type
+            {t('services.newType')}
           </Button>
           <Button onClick={() => setShowNouvellePrestation(true)} className="gradient-primary">
             <Scissors className="h-4 w-4 mr-2" />
-            Enregistrer prestation
+            {t('services.register')}
           </Button>
         </div>
       </div>
 
       <Tabs defaultValue="catalogue" className="space-y-4">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="catalogue">Catalogue</TabsTrigger>
+          <TabsTrigger value="catalogue">{t('services.catalog')}</TabsTrigger>
           <TabsTrigger value="calendrier" className="flex items-center gap-2">
             <CalendarDays className="h-4 w-4" />
-            Rendez-vous
+            {t('services.appointments')}
           </TabsTrigger>
-          <TabsTrigger value="historique">Historique</TabsTrigger>
+          <TabsTrigger value="historique">{t('services.history')}</TabsTrigger>
         </TabsList>
 
         {/* Catalogue with photos */}

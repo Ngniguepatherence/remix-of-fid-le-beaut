@@ -20,6 +20,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const depenseSchema = z.object({
   date: z.string().min(1),
@@ -193,6 +194,7 @@ function VenteForm({ onSubmit, onCancel }: { onSubmit: (v: Omit<Vente, 'id'>) =>
 export default function Finances() {
   const { ventes, depenses, addVente, addDepense, deleteVente, deleteDepense, stats } = useFinances();
   const { clients } = useClients();
+  const { t } = useLanguage();
   const [showVenteForm, setShowVenteForm] = useState(false);
   const [showDepenseForm, setShowDepenseForm] = useState(false);
 
@@ -215,12 +217,12 @@ export default function Finances() {
     <div className="p-4 lg:p-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Finances</h1>
-          <p className="text-muted-foreground">Suivi des ventes et dépenses</p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">{t('finances.title')}</h1>
+          <p className="text-muted-foreground">{t('finances.subtitle')}</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => setShowVenteForm(true)} className="gradient-primary"><ShoppingCart className="h-4 w-4 mr-2" />Nouvelle vente</Button>
-          <Button onClick={() => setShowDepenseForm(true)} variant="outline"><Receipt className="h-4 w-4 mr-2" />Dépense</Button>
+          <Button onClick={() => setShowVenteForm(true)} className="gradient-primary"><ShoppingCart className="h-4 w-4 mr-2" />{t('finances.newSale')}</Button>
+          <Button onClick={() => setShowDepenseForm(true)} variant="outline"><Receipt className="h-4 w-4 mr-2" />{t('finances.expense')}</Button>
         </div>
       </div>
 

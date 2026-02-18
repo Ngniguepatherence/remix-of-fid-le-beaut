@@ -16,6 +16,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const produitSchema = z.object({
   nom: z.string().min(2, 'Nom requis'),
@@ -105,6 +106,7 @@ function ProduitForm({ produit, onSubmit, onCancel }: { produit?: Produit; onSub
 
 export default function Stock() {
   const { produits, addProduit, updateProduit, deleteProduit, adjustStock, produitsEnAlerte, categories, valeurStock } = useStock();
+  const { t } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [catFilter, setCatFilter] = useState('all');
   const [showForm, setShowForm] = useState(false);
@@ -143,11 +145,11 @@ export default function Stock() {
     <div className="p-4 lg:p-6 space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Stock & Produits</h1>
-          <p className="text-muted-foreground">{produits.length} produits • Valeur: {formatFCFA(valeurStock)}</p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">{t('stock.title')}</h1>
+          <p className="text-muted-foreground">{produits.length} {t('stock.products')} • {t('stock.value')}: {formatFCFA(valeurStock)}</p>
         </div>
         <Button onClick={() => setShowForm(true)} className="gradient-primary">
-          <Plus className="h-4 w-4 mr-2" />Nouveau produit
+          <Plus className="h-4 w-4 mr-2" />{t('stock.newProduct')}
         </Button>
       </div>
 
