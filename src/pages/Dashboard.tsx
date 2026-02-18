@@ -14,6 +14,7 @@ import { usePrestations } from '@/hooks/usePrestations';
 import { useSalon } from '@/hooks/useSalon';
 import { useRendezVous } from '@/hooks/useRendezVous';
 import { useStock } from '@/hooks/useStock';
+import { useLanguage } from '@/contexts/LanguageContext';
 import heroSalon from '@/assets/hero-salon.jpg';
 import serviceHair from '@/assets/service-hair.jpg';
 import serviceMakeup from '@/assets/service-makeup.jpg';
@@ -28,6 +29,7 @@ export default function Dashboard() {
   const { salon } = useSalon();
   const { getRendezVousAujourdhui } = useRendezVous();
   const { produitsEnAlerte } = useStock();
+  const { t } = useLanguage();
 
   const clientesInactives = getInactiveClients(salon.joursRappelInactivite);
   const clientesActives = clients.length - clientesInactives.length;
@@ -37,7 +39,6 @@ export default function Dashboard() {
   const rdvAujourdhui = getRendezVousAujourdhui();
   const clientesVIP = clients.filter(c => c.statut === 'vip');
 
-  // Trend: compare this month vs last month
   const trend = useMemo(() => {
     const now = new Date();
     const thisKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
@@ -57,21 +58,21 @@ export default function Dashboard() {
         <img src={heroSalon} alt="Salon de beauté" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-r from-foreground/80 via-foreground/50 to-transparent flex items-end p-4 sm:p-6">
           <div className="text-white">
-            <p className="text-white/80 text-sm mb-1">Bienvenue sur</p>
+            <p className="text-white/80 text-sm mb-1">{t('dashboard.welcome')}</p>
             <h1 className="text-xl sm:text-2xl lg:text-4xl font-bold">{salon.nom}</h1>
-            <p className="text-white/80 mt-1 text-sm hidden sm:block">Gérez votre salon et fidélisez vos clientes</p>
+            <p className="text-white/80 mt-1 text-sm hidden sm:block">{t('dashboard.subtitle')}</p>
           </div>
         </div>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-3">
-        <StatCard title="Total Clientes" value={clients.length} icon={Users} variant="primary" />
-        <StatCard title="Clientes Actives" value={clientesActives} subtitle="Ces 30 derniers jours" icon={UserCheck} variant="success" />
-        <StatCard title="Clientes Inactives" value={clientesInactives.length} subtitle={`+${salon.joursRappelInactivite} jours`} icon={UserX} variant="warning" />
-        <StatCard title="RDV aujourd'hui" value={rdvAujourdhui.length} icon={Calendar} variant="default" />
-        <StatCard title="Revenus du mois" value={formatCurrency(revenusCeMois)} icon={TrendingUp} variant="accent" trend={trend} />
-        <StatCard title="Visites ce mois" value={visitesCeMois} icon={Scissors} variant="default" />
+        <StatCard title={t('dashboard.totalClients')} value={clients.length} icon={Users} variant="primary" />
+        <StatCard title={t('dashboard.activeClients')} value={clientesActives} subtitle={t('dashboard.activeLast30')} icon={UserCheck} variant="success" />
+        <StatCard title={t('dashboard.inactiveClients')} value={clientesInactives.length} subtitle={`+${salon.joursRappelInactivite} ${t('dashboard.days')}`} icon={UserX} variant="warning" />
+        <StatCard title={t('dashboard.todayAppointments')} value={rdvAujourdhui.length} icon={Calendar} variant="default" />
+        <StatCard title={t('dashboard.monthRevenue')} value={formatCurrency(revenusCeMois)} icon={TrendingUp} variant="accent" trend={trend} />
+        <StatCard title={t('dashboard.monthVisits')} value={visitesCeMois} icon={Scissors} variant="default" />
       </div>
 
       {/* Charts Row */}
@@ -94,10 +95,10 @@ export default function Dashboard() {
               <img src={serviceHair} alt="Coiffure" className="absolute inset-0 w-full h-full object-cover" />
             </div>
             <CardContent className="flex-1 p-4 flex flex-col justify-center">
-              <h3 className="font-semibold text-base sm:text-lg mb-1">Nouvelle prestation</h3>
-              <p className="text-xs sm:text-sm text-muted-foreground mb-3">Enregistrez une visite cliente</p>
+              <h3 className="font-semibold text-base sm:text-lg mb-1">{t('dashboard.newService')}</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-3">{t('dashboard.registerVisit')}</p>
               <Link to="/prestations">
-                <Button size="sm" className="gradient-primary"><ArrowRight className="h-4 w-4 mr-2" />Ajouter</Button>
+                <Button size="sm" className="gradient-primary"><ArrowRight className="h-4 w-4 mr-2" />{t('dashboard.add')}</Button>
               </Link>
             </CardContent>
           </div>
@@ -108,10 +109,10 @@ export default function Dashboard() {
               <img src={serviceMakeup} alt="Maquillage" className="absolute inset-0 w-full h-full object-cover" />
             </div>
             <CardContent className="flex-1 p-4 flex flex-col justify-center">
-              <h3 className="font-semibold text-base sm:text-lg mb-1">Nouvelle cliente</h3>
-              <p className="text-xs sm:text-sm text-muted-foreground mb-3">Ajoutez une cliente à votre base</p>
+              <h3 className="font-semibold text-base sm:text-lg mb-1">{t('dashboard.newClient')}</h3>
+              <p className="text-xs sm:text-sm text-muted-foreground mb-3">{t('dashboard.addClientDesc')}</p>
               <Link to="/clientes">
-                <Button size="sm" className="gradient-primary"><ArrowRight className="h-4 w-4 mr-2" />Ajouter</Button>
+                <Button size="sm" className="gradient-primary"><ArrowRight className="h-4 w-4 mr-2" />{t('dashboard.add')}</Button>
               </Link>
             </CardContent>
           </div>
@@ -124,7 +125,7 @@ export default function Dashboard() {
           <CardHeader>
             <CardTitle className="text-lg flex items-center gap-2">
               <Star className="h-5 w-5 text-accent" />
-              Clientes VIP
+              {t('dashboard.vipClients')}
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -137,10 +138,10 @@ export default function Dashboard() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-medium text-foreground truncate">{client.nom}</p>
-                      <p className="text-xs text-muted-foreground">{client.nombreVisites} visites</p>
+                      <p className="text-xs text-muted-foreground">{client.nombreVisites} {t('dashboard.visits')}</p>
                     </div>
                     <Badge className="bg-accent/20 text-accent border-0">
-                      <Gift className="h-3 w-3 mr-1" />{client.pointsFidelite} pts
+                      <Gift className="h-3 w-3 mr-1" />{client.pointsFidelite} {t('dashboard.pts')}
                     </Badge>
                   </div>
                 ))}
@@ -148,7 +149,7 @@ export default function Dashboard() {
             ) : (
               <div className="text-center py-8">
                 <Star className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
-                <p className="text-muted-foreground text-sm">Pas encore de clientes VIP</p>
+                <p className="text-muted-foreground text-sm">{t('dashboard.noVip')}</p>
               </div>
             )}
           </CardContent>
@@ -158,10 +159,10 @@ export default function Dashboard() {
           <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle className="text-lg flex items-center gap-2">
               <Users className="h-5 w-5 text-primary" />
-              Clientes récentes
+              {t('dashboard.recentClients')}
             </CardTitle>
             <Link to="/clientes">
-              <Button variant="ghost" size="sm">Voir tout <ArrowRight className="h-4 w-4 ml-2" /></Button>
+              <Button variant="ghost" size="sm">{t('dashboard.viewAll')} <ArrowRight className="h-4 w-4 ml-2" /></Button>
             </Link>
           </CardHeader>
           <CardContent>
@@ -193,7 +194,7 @@ export default function Dashboard() {
             ) : (
               <div className="text-center py-8">
                 <Users className="h-12 w-12 text-muted-foreground/30 mx-auto mb-3" />
-                <p className="text-muted-foreground text-sm">Aucune cliente enregistrée</p>
+                <p className="text-muted-foreground text-sm">{t('dashboard.noClients')}</p>
               </div>
             )}
           </CardContent>

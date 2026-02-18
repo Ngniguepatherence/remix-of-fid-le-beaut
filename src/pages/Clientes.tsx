@@ -22,12 +22,7 @@ import { ClientForm } from '@/components/clients/ClientForm';
 import { ClientDetail } from '@/components/clients/ClientDetail';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-
-const statusLabels: Record<ClientStatus, string> = {
-  nouvelle: 'Nouvelle',
-  reguliere: 'Régulière',
-  vip: 'VIP',
-};
+import { useLanguage } from '@/contexts/LanguageContext';
 
 const statusStyles: Record<ClientStatus, string> = {
   nouvelle: 'bg-muted text-muted-foreground',
@@ -37,6 +32,13 @@ const statusStyles: Record<ClientStatus, string> = {
 
 export default function Clientes() {
   const { clients, addClient, updateClient, deleteClient } = useClients();
+  const { t, language } = useLanguage();
+
+  const statusLabels: Record<ClientStatus, string> = {
+    nouvelle: t('clients.nouvelle'),
+    reguliere: t('clients.reguliere'),
+    vip: t('clients.vip'),
+  };
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<ClientStatus | 'all'>('all');
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -74,7 +76,7 @@ export default function Clientes() {
   };
 
   const handleDeleteClient = (id: string) => {
-    if (confirm('Êtes-vous sûr de vouloir supprimer cette cliente ?')) {
+    if (confirm(t('clients.deleteConfirm'))) {
       deleteClient(id);
     }
   };
@@ -84,12 +86,12 @@ export default function Clientes() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Clientes</h1>
-          <p className="text-muted-foreground">{clients.length} clientes enregistrées</p>
+          <h1 className="text-2xl lg:text-3xl font-bold text-foreground">{t('clients.title')}</h1>
+          <p className="text-muted-foreground">{clients.length} {t('clients.registered')}</p>
         </div>
         <Button onClick={() => setShowAddDialog(true)} className="gradient-primary">
           <Plus className="h-4 w-4 mr-2" />
-          Nouvelle cliente
+          {t('clients.new')}
         </Button>
       </div>
 
@@ -98,7 +100,7 @@ export default function Clientes() {
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <Input
-            placeholder="Rechercher par nom ou téléphone..."
+            placeholder={t('clients.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-10"
@@ -110,7 +112,7 @@ export default function Clientes() {
             size="sm"
             onClick={() => setStatusFilter('all')}
           >
-            Toutes
+            {t('clients.all')}
           </Button>
           {(['nouvelle', 'reguliere', 'vip'] as ClientStatus[]).map((status) => (
             <Button
@@ -154,18 +156,18 @@ export default function Clientes() {
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => setViewingClient(client)}>
                       <Eye className="h-4 w-4 mr-2" />
-                      Voir détails
+                      {t('clients.viewDetails')}
                     </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setEditingClient(client)}>
                       <Edit className="h-4 w-4 mr-2" />
-                      Modifier
+                      {t('clients.edit')}
                     </DropdownMenuItem>
                     <DropdownMenuItem 
                       onClick={() => handleDeleteClient(client.id)}
                       className="text-destructive"
                     >
                       <Trash2 className="h-4 w-4 mr-2" />
-                      Supprimer
+                      {t('clients.delete')}
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -178,18 +180,18 @@ export default function Clientes() {
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Calendar className="h-4 w-4" />
-                  <span>Inscrite le {new Date(client.dateInscription).toLocaleDateString('fr-FR')}</span>
+                  <span>{t('clients.registeredOn')} {new Date(client.dateInscription).toLocaleDateString(language === 'en' ? 'en-GB' : 'fr-FR')}</span>
                 </div>
               </div>
 
               <div className="mt-4 pt-4 border-t border-border space-y-2">
                 <div className="flex items-center justify-between text-sm">
                   <div>
-                    <span className="text-muted-foreground">Visites: </span>
+                    <span className="text-muted-foreground">{t('clients.visits')}: </span>
                     <span className="font-semibold">{client.nombreVisites}</span>
                   </div>
                   <div>
-                    <span className="text-muted-foreground">Points: </span>
+                    <span className="text-muted-foreground">{t('clients.points')}: </span>
                     <span className="font-semibold text-primary">{client.pointsFidelite}</span>
                   </div>
                 </div>
@@ -212,7 +214,7 @@ export default function Clientes() {
 
       {filteredClients.length === 0 && (
         <div className="text-center py-12">
-          <p className="text-muted-foreground">Aucune cliente trouvée</p>
+          <p className="text-muted-foreground">{t('clients.notFound')}</p>
         </div>
       )}
 
@@ -220,7 +222,7 @@ export default function Clientes() {
       <Dialog open={showAddDialog} onOpenChange={setShowAddDialog}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Nouvelle cliente</DialogTitle>
+            <DialogTitle>{t('clients.new')}</DialogTitle>
           </DialogHeader>
           <ClientForm clients={clients} onSubmit={handleAddClient} onCancel={() => setShowAddDialog(false)} />
         </DialogContent>
@@ -230,7 +232,7 @@ export default function Clientes() {
       <Dialog open={!!editingClient} onOpenChange={() => setEditingClient(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>Modifier la cliente</DialogTitle>
+            <DialogTitle>{t('clients.editTitle')}</DialogTitle>
           </DialogHeader>
           {editingClient && (
             <ClientForm 

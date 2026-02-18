@@ -8,7 +8,6 @@ import {
   Bell,
   Settings,
   Menu,
-  X,
   Gift,
   MessageSquare,
   Sparkles,
@@ -20,31 +19,44 @@ import {
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { useNotifications } from '@/contexts/NotificationContext';
 import { useNavigate } from 'react-router-dom';
+import { NotificationCenter } from '@/components/layout/NotificationCenter';
+import { LanguageToggle } from '@/components/layout/LanguageToggle';
+import { Badge } from '@/components/ui/badge';
 
 interface NavItem {
   href: string;
-  label: string;
+  labelKey: string;
   icon: React.ElementType;
+  badgeKey?: 'stock' | 'rdv' | 'inactive';
 }
 
 const navItems: NavItem[] = [
-  { href: '/', label: 'Tableau de bord', icon: LayoutDashboard },
-  { href: '/clientes', label: 'Clientes', icon: Users },
-  { href: '/prestations', label: 'Prestations', icon: Scissors },
-  { href: '/rendez-vous', label: 'Rendez-vous', icon: CalendarDays },
-  { href: '/stock', label: 'Stock', icon: Package },
-  { href: '/finances', label: 'Finances', icon: DollarSign },
-  { href: '/fidelite', label: 'Fidélité', icon: Gift },
-  { href: '/rappels', label: 'Rappels', icon: Bell },
-  { href: '/campagnes', label: 'Campagnes', icon: MessageSquare },
-  { href: '/parametres', label: 'Paramètres', icon: Settings },
+  { href: '/', labelKey: 'nav.dashboard', icon: LayoutDashboard },
+  { href: '/clientes', labelKey: 'nav.clients', icon: Users },
+  { href: '/prestations', labelKey: 'nav.services', icon: Scissors },
+  { href: '/rendez-vous', labelKey: 'nav.appointments', icon: CalendarDays, badgeKey: 'rdv' },
+  { href: '/stock', labelKey: 'nav.stock', icon: Package, badgeKey: 'stock' },
+  { href: '/finances', labelKey: 'nav.finances', icon: DollarSign },
+  { href: '/fidelite', labelKey: 'nav.loyalty', icon: Gift },
+  { href: '/rappels', labelKey: 'nav.reminders', icon: Bell, badgeKey: 'inactive' },
+  { href: '/campagnes', labelKey: 'nav.campaigns', icon: MessageSquare },
+  { href: '/parametres', labelKey: 'nav.settings', icon: Settings },
 ];
 
 function NavLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
   const location = useLocation();
+  const { t } = useLanguage();
+  const { stockAlertCount, rdvTodayCount, inactiveCount } = useNotifications();
   const isActive = location.pathname === item.href;
   const Icon = item.icon;
+
+  const badgeCount = item.badgeKey === 'stock' ? stockAlertCount
+    : item.badgeKey === 'rdv' ? rdvTodayCount
+    : item.badgeKey === 'inactive' ? inactiveCount
+    : 0;
 
   return (
     <Link
@@ -57,13 +69,24 @@ function NavLink({ item, onClick }: { item: NavItem; onClick?: () => void }) {
       )}
     >
       <Icon className="h-5 w-5" />
-      <span className="font-medium">{item.label}</span>
+      <span className="font-medium flex-1">{t(item.labelKey)}</span>
+      {badgeCount > 0 && (
+        <Badge
+          className={cn(
+            'h-5 min-w-[20px] px-1.5 text-[10px] font-bold flex items-center justify-center',
+            isActive ? 'bg-primary-foreground/20 text-primary-foreground' : 'bg-destructive text-destructive-foreground'
+          )}
+        >
+          {badgeCount}
+        </Badge>
+      )}
     </Link>
   );
 }
 
 function Sidebar({ className, onItemClick }: { className?: string; onItemClick?: () => void }) {
   const { logout, currentSalon } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -99,7 +122,7 @@ function Sidebar({ className, onItemClick }: { className?: string; onItemClick?:
       <div className="p-4 border-t border-sidebar-border space-y-2">
         <Button variant="ghost" className="w-full justify-start text-muted-foreground" onClick={handleLogout}>
           <LogOut className="h-4 w-4 mr-2" />
-          Déconnexion
+          {t('nav.logout')}
         </Button>
         <p className="text-xs text-muted-foreground text-center">
           © 2025 LeaderBright
@@ -129,22 +152,32 @@ export default function AppLayout() {
             <span className="font-bold text-foreground">BeautyFlow</span>
           </Link>
 
-          <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
-            <SheetTrigger asChild>
-              <Button variant="ghost" size="icon">
-                <Menu className="h-6 w-6" />
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="left" className="w-72 p-0">
-              <Sidebar onItemClick={() => setMobileMenuOpen(false)} />
-            </SheetContent>
-          </Sheet>
+          <div className="flex items-center gap-1">
+            <LanguageToggle />
+            <NotificationCenter />
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-6 w-6" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-72 p-0">
+                <Sidebar onItemClick={() => setMobileMenuOpen(false)} />
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
       </header>
 
+      {/* Desktop top bar with language toggle + notifications */}
+      <div className="hidden lg:flex fixed top-0 left-64 right-0 z-20 h-14 bg-card border-b border-border items-center justify-end px-6 gap-2">
+        <LanguageToggle />
+        <NotificationCenter />
+      </div>
+
       {/* Main Content */}
       <main className="flex-1 lg:ml-64">
-        <div className="pt-16 lg:pt-0 min-h-screen">
+        <div className="pt-16 lg:pt-14 min-h-screen">
           <Outlet />
         </div>
       </main>

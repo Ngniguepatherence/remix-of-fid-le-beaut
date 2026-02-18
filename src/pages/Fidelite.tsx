@@ -6,10 +6,12 @@ import { useClients } from '@/hooks/useClients';
 import { useSalon } from '@/hooks/useSalon';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function Fidelite() {
   const { clients } = useClients();
   const { salon } = useSalon();
+  const { t } = useLanguage();
 
   const clientsVIP = clients.filter(c => c.statut === 'vip');
   const clientsWithProgress = clients.map(client => {
@@ -23,8 +25,8 @@ export default function Fidelite() {
     <div className="p-4 lg:p-6 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="text-2xl lg:text-3xl font-bold text-foreground">Programme de Fidélité</h1>
-        <p className="text-muted-foreground">Suivez la progression de vos clientes</p>
+        <h1 className="text-2xl lg:text-3xl font-bold text-foreground">{t('loyalty.title')}</h1>
+        <p className="text-muted-foreground">{t('loyalty.subtitle')}</p>
       </div>
 
       {/* Stats */}

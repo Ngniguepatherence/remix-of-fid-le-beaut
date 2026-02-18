@@ -4,6 +4,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { LanguageProvider } from "@/contexts/LanguageContext";
+import { NotificationProvider } from "@/contexts/NotificationContext";
 import AppLayout from "@/components/layout/AppLayout";
 import Dashboard from "@/pages/Dashboard";
 import Clientes from "@/pages/Clientes";
@@ -36,6 +38,14 @@ function AdminGuard({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function SalonProviders({ children }: { children: React.ReactNode }) {
+  return (
+    <NotificationProvider>
+      {children}
+    </NotificationProvider>
+  );
+}
+
 function AppRoutes() {
   return (
     <Routes>
@@ -47,7 +57,7 @@ function AppRoutes() {
       <Route path="/admin" element={<AdminGuard><AdminDashboard /></AdminGuard>} />
 
       {/* Salon (protected) */}
-      <Route element={<SalonGuard><AppLayout /></SalonGuard>}>
+      <Route element={<SalonGuard><SalonProviders><AppLayout /></SalonProviders></SalonGuard>}>
         <Route path="/" element={<Dashboard />} />
         <Route path="/clientes" element={<Clientes />} />
         <Route path="/prestations" element={<Prestations />} />
@@ -71,9 +81,11 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <AuthProvider>
-          <AppRoutes />
-        </AuthProvider>
+        <LanguageProvider>
+          <AuthProvider>
+            <AppRoutes />
+          </AuthProvider>
+        </LanguageProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
