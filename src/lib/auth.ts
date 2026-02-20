@@ -1,4 +1,4 @@
-import { SalonAccount, AdminUser, AuthSession } from '@/types/auth';
+import { SalonAccount, AdminUser, AuthSession, SalonUser, SalonUserRole } from '@/types/auth';
 import { getStorageItem, setStorageItem } from '@/lib/storage';
 
 const ADMIN_KEY = 'beautyflow_admin';
@@ -41,25 +41,106 @@ export function saveSalonAccounts(salons: SalonAccount[]): void {
   setStorageItem(SALONS_KEY, salons);
 }
 
-export function createSalonAccount(data: Omit<SalonAccount, 'id' | 'dateCreation' | 'abonnementActif' | 'montantAbonnement' | 'joursAbonnement'>): SalonAccount {
+export function createSalonAccount(data: Omit<SalonAccount, 'id' | 'dateCreation' | 'abonnementActif' | 'montantAbonnement' | 'joursAbonnement' | 'users'>): SalonAccount {
   const salons = getSalonAccounts();
+  const salonId = crypto.randomUUID();
+  const hashedPwd = simpleHash(data.motDePasse);
+
+  // Create owner user
+  const ownerUser: SalonUser = {
+    id: crypto.randomUUID(),
+    salonId,
+    nom: data.proprietaire,
+    email: data.email,
+    motDePasse: hashedPwd,
+    role: 'owner',
+    telephone: data.telephone,
+    dateCreation: new Date().toISOString().split('T')[0],
+  };
+
   const newSalon: SalonAccount = {
     ...data,
-    id: crypto.randomUUID(),
+    id: salonId,
     dateCreation: new Date().toISOString().split('T')[0],
-    motDePasse: simpleHash(data.motDePasse),
+    motDePasse: hashedPwd,
     abonnementActif: true,
     montantAbonnement: 25000,
     joursAbonnement: 30,
+    users: [ownerUser],
   };
   salons.push(newSalon);
   saveSalonAccounts(salons);
   return newSalon;
 }
 
-export function verifySalonLogin(email: string, password: string): SalonAccount | null {
+// ===== Staff management =====
+export function addStaffToSalon(salonId: string, staffData: { nom: string; email: string; motDePasse: string; telephone?: string }): SalonUser | null {
   const salons = getSalonAccounts();
-  return salons.find(s => s.email === email && s.motDePasse === simpleHash(password)) || null;
+  const index = salons.findIndex(s => s.id === salonId);
+  if (index < 0) return null;
+
+  // Check email uniqueness across all salon users
+  const allEmails = salons.flatMap(s => (s.users || []).map(u => u.email));
+  if (allEmails.includes(staffData.email)) return null;
+
+  const newUser: SalonUser = {
+    id: crypto.randomUUID(),
+    salonId,
+    nom: staffData.nom,
+    email: staffData.email,
+    motDePasse: simpleHash(staffData.motDePasse),
+    role: 'staff',
+    telephone: staffData.telephone,
+    dateCreation: new Date().toISOString().split('T')[0],
+  };
+
+  if (!salons[index].users) salons[index].users = [];
+  salons[index].users!.push(newUser);
+  saveSalonAccounts(salons);
+  return newUser;
+}
+
+export function removeStaffFromSalon(salonId: string, userId: string): boolean {
+  const salons = getSalonAccounts();
+  const index = salons.findIndex(s => s.id === salonId);
+  if (index < 0) return false;
+  salons[index].users = (salons[index].users || []).filter(u => u.id !== userId || u.role === 'owner');
+  saveSalonAccounts(salons);
+  return true;
+}
+
+export function getSalonUsers(salonId: string): SalonUser[] {
+  const salons = getSalonAccounts();
+  const salon = salons.find(s => s.id === salonId);
+  return salon?.users || [];
+}
+
+// ===== Login =====
+export function verifySalonLogin(email: string, password: string): { salon: SalonAccount; user: SalonUser } | null {
+  const salons = getSalonAccounts();
+  const hashed = simpleHash(password);
+
+  for (const salon of salons) {
+    // Check salon users first
+    if (salon.users && salon.users.length > 0) {
+      const user = salon.users.find(u => u.email === email && u.motDePasse === hashed);
+      if (user) return { salon, user };
+    }
+    // Legacy fallback: direct salon email/password (for old accounts without users array)
+    if (salon.email === email && salon.motDePasse === hashed) {
+      const legacyUser: SalonUser = {
+        id: 'legacy_' + salon.id,
+        salonId: salon.id,
+        nom: salon.proprietaire,
+        email: salon.email,
+        motDePasse: salon.motDePasse,
+        role: 'owner',
+        dateCreation: salon.dateCreation,
+      };
+      return { salon, user: legacyUser };
+    }
+  }
+  return null;
 }
 
 export function isSalonSubscriptionActive(salon: SalonAccount): boolean {
