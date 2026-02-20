@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, LogIn, Shield, Eye, EyeOff } from 'lucide-react';
+import { Sparkles, LogIn, Shield, Eye, EyeOff, Crown, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
@@ -9,6 +9,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { LanguageToggle } from '@/components/layout/LanguageToggle';
+import loginBg from '@/assets/login-bg.jpg';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -34,29 +35,46 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-4">
-      <div className="w-full max-w-sm sm:max-w-md space-y-6">
+    <div className="min-h-screen relative flex items-center justify-center p-4 overflow-hidden">
+      {/* Background image */}
+      <div
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{ backgroundImage: `url(${loginBg})` }}
+      />
+      {/* Dark overlay */}
+      <div className="absolute inset-0 bg-foreground/60 backdrop-blur-sm" />
+
+      {/* Content */}
+      <div className="relative z-10 w-full max-w-sm sm:max-w-md space-y-6">
         {/* Language toggle */}
         <div className="flex justify-end">
-          <LanguageToggle />
+          <div className="bg-background/20 backdrop-blur-md rounded-full">
+            <LanguageToggle />
+          </div>
         </div>
 
         {/* Logo */}
         <div className="text-center">
-          <div className="h-14 w-14 sm:h-16 sm:w-16 rounded-2xl gradient-primary flex items-center justify-center mx-auto mb-3 sm:mb-4 shadow-lg">
-            <Sparkles className="h-7 w-7 sm:h-9 sm:w-9 text-primary-foreground" />
+          <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-2xl gradient-primary flex items-center justify-center mx-auto mb-4 shadow-2xl ring-4 ring-primary-foreground/20">
+            <Sparkles className="h-8 w-8 sm:h-10 sm:w-10 text-primary-foreground" />
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-foreground">LeaderBright</h1>
-          <p className="text-sm sm:text-base text-muted-foreground">{t('login.salonSpace')}</p>
+          <h1 className="text-3xl sm:text-4xl font-bold text-primary-foreground drop-shadow-lg">LeaderBright</h1>
+          <p className="text-sm sm:text-base text-primary-foreground/80 mt-1">{t('login.salonSpace')}</p>
         </div>
 
-        <Card className="card-shadow">
+        {/* Login card with glassmorphism */}
+        <Card className="bg-card/80 backdrop-blur-xl border-primary-foreground/10 shadow-2xl">
           <CardHeader className="pb-4 sm:pb-6">
             <CardTitle className="flex items-center gap-2 text-lg sm:text-xl">
               <LogIn className="h-5 w-5 text-primary" />
               {t('login.title')}
             </CardTitle>
             <CardDescription className="text-xs sm:text-sm">{t('login.accessSalon')}</CardDescription>
+            <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground">
+              <span className="flex items-center gap-1"><Crown className="h-3 w-3 text-accent" /> Owner</span>
+              <span className="flex items-center gap-1"><User className="h-3 w-3" /> Staff</span>
+              <span>— connectez-vous avec vos identifiants</span>
+            </div>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
@@ -69,7 +87,7 @@ export default function Login() {
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   required
-                  className="h-11 sm:h-10 text-base sm:text-sm"
+                  className="h-11 sm:h-10 text-base sm:text-sm bg-background/60 backdrop-blur-sm"
                 />
               </div>
               <div className="space-y-2">
@@ -82,7 +100,7 @@ export default function Login() {
                     value={password}
                     onChange={e => setPassword(e.target.value)}
                     required
-                    className="h-11 sm:h-10 text-base sm:text-sm pr-10"
+                    className="h-11 sm:h-10 text-base sm:text-sm pr-10 bg-background/60 backdrop-blur-sm"
                   />
                   <button
                     type="button"
@@ -93,7 +111,7 @@ export default function Login() {
                   </button>
                 </div>
               </div>
-              <Button type="submit" className="w-full gradient-primary h-11 sm:h-10 text-base sm:text-sm" disabled={loading}>
+              <Button type="submit" className="w-full gradient-primary h-11 sm:h-10 text-base sm:text-sm shadow-lg" disabled={loading}>
                 {loading ? t('login.loading') : t('login.submit')}
               </Button>
             </form>
@@ -101,7 +119,7 @@ export default function Login() {
         </Card>
 
         <div className="text-center">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/admin/login')} className="text-muted-foreground text-xs sm:text-sm">
+          <Button variant="ghost" size="sm" onClick={() => navigate('/admin/login')} className="text-primary-foreground/70 hover:text-primary-foreground hover:bg-primary-foreground/10 text-xs sm:text-sm">
             <Shield className="h-4 w-4 mr-1" />
             {t('login.admin')}
           </Button>

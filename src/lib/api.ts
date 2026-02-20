@@ -35,7 +35,7 @@ export const authApi = {
     return verifyAdminLocal(email, password);
   },
 
-  verifySalonLogin: async (email: string, password: string): Promise<SalonAccount | null> => {
+  verifySalonLogin: async (email: string, password: string): Promise<{ salon: SalonAccount; user: import('@/types/auth').SalonUser } | null> => {
     // TODO: Replace with POST /api/auth/salon/login
     return verifySalonLocal(email, password);
   },

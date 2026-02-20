@@ -106,6 +106,7 @@ export default function AdminDashboard() {
                     salon={salon}
                     onRenew={handleRenew}
                     onToggle={handleToggle}
+                    onRefresh={refresh}
                   />
                 ))}
               </div>

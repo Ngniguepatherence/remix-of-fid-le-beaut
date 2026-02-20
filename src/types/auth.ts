@@ -1,5 +1,18 @@
 // Types pour le système multi-tenant
 
+export type SalonUserRole = 'owner' | 'staff';
+
+export interface SalonUser {
+  id: string;
+  salonId: string;
+  nom: string;
+  email: string;
+  motDePasse: string; // hash simple
+  role: SalonUserRole;
+  telephone?: string;
+  dateCreation: string;
+}
+
 export interface SalonAccount {
   id: string;
   nom: string;
@@ -7,12 +20,13 @@ export interface SalonAccount {
   telephone: string;
   adresse?: string;
   email: string;
-  motDePasse: string; // hash simple
+  motDePasse: string; // hash simple (legacy, owner default)
   dateCreation: string;
   dernierPaiement: string; // date ISO
   abonnementActif: boolean;
   montantAbonnement: number; // 25000 FCFA
   joursAbonnement: number; // 30
+  users?: SalonUser[]; // owner + staff
 }
 
 export interface AdminUser {
@@ -23,6 +37,9 @@ export interface AdminUser {
 export interface AuthSession {
   type: 'admin' | 'salon';
   salonId?: string;
+  userId?: string;
+  userRole?: SalonUserRole;
+  userName?: string;
   email: string;
   timestamp: number;
 }
